@@ -53,4 +53,5 @@ export interface AnalysisData {
   commits: Commit[];
   tree: FileNode[];
   readme: string | null;
+  summary: string;
 }

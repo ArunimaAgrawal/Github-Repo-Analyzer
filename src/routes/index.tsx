@@ -306,6 +306,10 @@ function Results({ data }: { data: AnalysisData }) {
           <FileExplorer tree={data.tree} ownerRepo={r.full_name} />
         </div>
         <Timeline data={data} />
+        <div className="glass rounded-2xl p-6 lg:col-span-3">
+          <h3 className="font-display text-lg font-semibold">What this repo does</h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{data.summary}</p>
+        </div>
         {r.topics?.length > 0 && (
           <div className="lg:col-span-3">
             <TopicCloud topics={r.topics} />

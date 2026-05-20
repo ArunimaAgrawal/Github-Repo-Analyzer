@@ -30,6 +30,43 @@ async function gh<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]+`/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_~>-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function summarizeRepo(repo: Repo, readme: string | null): string {
+  const desc = (repo.description || "").trim();
+  const cleaned = readme ? stripMarkdown(readme) : "";
+  const firstSentence = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .find((s) => s.length > 40 && s.length < 260 && /[a-zA-Z]/.test(s));
+
+  const languageHints = Object.keys({ [repo.language || ""]: 1 })
+    .filter(Boolean)
+    .join(", ");
+
+  if (desc && firstSentence) {
+    return `${desc}. ${firstSentence}`;
+  }
+  if (desc) {
+    return languageHints
+      ? `${desc}. Primary stack appears to include ${languageHints}.`
+      : `${desc}.`;
+  }
+  if (firstSentence) {
+    return firstSentence;
+  }
+  return "No clear summary available from the repository metadata yet.";
+}
+
 export async function analyze(owner: string, repo: string): Promise<AnalysisData> {
   const repoData = await gh<Repo>(`/repos/${owner}/${repo}`);
   const [languages, contributors, commits, treeRes] = await Promise.all([
@@ -59,7 +96,8 @@ export async function analyze(owner: string, repo: string): Promise<AnalysisData
         .sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === "dir" ? -1 : 1))
     : [];
 
-  return { repo: repoData, languages, contributors, commits, tree, readme };
+  const summary = summarizeRepo(repoData, readme);
+  return { repo: repoData, languages, contributors, commits, tree, readme, summary };
 }
 
 // Derived metrics
