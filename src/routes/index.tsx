@@ -224,7 +224,7 @@ function Index() {
               <div className="grid h-full w-full place-items-center bg-hero-grad p-6 text-center text-white">
                 <div>
                   <div className="font-display text-4xl">⌬ Octoscope</div>
-                  <div className="mt-2 text-sm opacity-80">repo · radiology · in your browser</div>
+                  <div className="mt-2 text-sm opacity-80">turning commit chaos into clone-worthy clarity.</div>
                 </div>
               </div>
             </MacbookScroll>
